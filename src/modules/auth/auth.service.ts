@@ -102,3 +102,31 @@ export const updatePassword = async ({
     data: { password: hashed },
   });
 };
+
+interface UpdateProfileInput {
+  userId: string;
+  name?: string;
+  photo?: string;
+}
+
+export const updateProfile = async ({
+  userId,
+  name,
+  photo,
+}: UpdateProfileInput) => {
+  console.log('userId: ', userId);
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      ...(name && { name }),
+      ...(photo && { photo }),
+    },
+  });
+
+  return {
+    id: updated.id,
+    name: updated.name,
+    email: updated.email,
+    photo: updated.photo,
+  };
+};

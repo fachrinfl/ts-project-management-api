@@ -19,8 +19,10 @@ export const authenticate = (
   }
 
   try {
-    const payload = jwt.verify(token, config.jwt.accessSecret!);
-    req.user = payload as { userId: string };
+    const payload = jwt.verify(token, config.jwt.accessSecret!) as {
+      userId: string;
+    };
+    req.user = { userId: payload.userId };
     next();
   } catch (err) {
     return res.status(401).json({ message: 'Invalid or expired access token' });

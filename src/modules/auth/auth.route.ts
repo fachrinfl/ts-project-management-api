@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.middleware';
 import {
+  getMe,
   login,
   logout,
   refreshAccessToken,
   register,
   updatePassword,
+  updateProfile,
 } from './auth.controller';
 
 const router = Router();
@@ -153,5 +155,75 @@ router.post('/logout', logout);
  *         description: Unauthorized
  */
 router.put('/update-password', authenticate, updatePassword);
+
+/**
+ * @swagger
+ * /api/auth/update-profile:
+ *   put:
+ *     summary: Update user profile (name and photo)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Fachri Updated
+ *               photo:
+ *                 type: string
+ *                 format: uri
+ *                 example: https://res.cloudinary.com/your-cloud/image/upload/v123/photo.jpg
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       400:
+ *         description: Validation or update failed
+ *       401:
+ *         description: Unauthorized
+ */
+router.put('/update-profile', authenticate, updateProfile);
+
+/**
+ * @swagger
+ * /api/auth/me:
+ *   get:
+ *     summary: Get current user profile
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Return logged-in user profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     photo:
+ *                       type: string
+ *                       format: uri
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+router.get('/me', authenticate, getMe);
 
 export default router;

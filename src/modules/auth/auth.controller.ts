@@ -9,11 +9,13 @@ import {
   loginUser,
   registerUser,
   updatePassword as updatePasswordService,
+  updateProfile as updateProfileService,
 } from './auth.service';
 import {
   LoginSchema,
   RegisterSchema,
   UpdatePasswordSchema,
+  UpdateProfileSchema,
 } from './auth.validation';
 
 const prisma = new PrismaClient();
@@ -114,5 +116,60 @@ export const logout = async (req: Request, res: Response) => {
     res.status(200).json({ message: 'Logged out successfully' });
   } catch (err) {
     res.status(400).json({ message: 'Logout failed or token not found' });
+  }
+};
+
+export const updateProfile = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user || !req.user.userId) {
+      return res
+        .status(401)
+        .json({ message: 'Unauthorized: no userId in token' });
+    }
+
+    const parsed = UpdateProfileSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res
+        .status(400)
+        .json({ message: 'Validation failed', errors: parsed.error.format() });
+    }
+
+    const user = await updateProfileService({
+      userId: req.user!.userId,
+      ...parsed.data,
+    });
+
+    res.status(200).json({ message: 'Profile updated successfully', user });
+  } catch (err: any) {
+    res.status(400).json({ message: err.message || 'Update failed' });
+  }
+};
+
+export const getMe = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user?.userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        photo: true,
+        createdAt: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({ user });
+  } catch (err: any) {
+    return res
+      .status(500)
+      .json({ message: err.message || 'Failed to get profile' });
   }
 };
