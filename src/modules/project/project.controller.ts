@@ -1,6 +1,12 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
-import { createProject, getProjects } from './project.service';
+import {
+  createProject,
+  deleteProjectById,
+  getProjectById,
+  getProjects,
+  updateProjectById,
+} from './project.service';
 import { CreateProjectSchema } from './project.validation';
 
 export const createProjectHandler = async (
@@ -56,5 +62,47 @@ export const getProjectsHandler = async (
     res.status(200).json(result);
   } catch (err: any) {
     res.status(500).json({ message: err.message || 'Failed to get projects' });
+  }
+};
+
+export const getProjectByIdHandler = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const project = await getProjectById(id);
+
+    res.status(200).json({ data: project });
+  } catch (err: any) {
+    res.status(404).json({ message: err.message || 'Project not found' });
+  }
+};
+
+export const updateProjectByIdHandler = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const body = req.body;
+
+    const project = await updateProjectById(id, body);
+
+    res.status(200).json({
+      message: 'Project updated successfully',
+      data: project,
+    });
+  } catch (err: any) {
+    res.status(400).json({ message: err.message || 'Update failed' });
+  }
+};
+
+export const deleteProjectByIdHandler = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    await deleteProjectById(id);
+
+    res.status(200).json({ message: 'Project deleted successfully' });
+  } catch (err: any) {
+    res
+      .status(400)
+      .json({ message: err.message || 'Failed to delete project' });
   }
 };

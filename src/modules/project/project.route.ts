@@ -1,6 +1,12 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.middleware';
-import { createProjectHandler, getProjectsHandler } from './project.controller';
+import {
+  createProjectHandler,
+  deleteProjectByIdHandler,
+  getProjectByIdHandler,
+  getProjectsHandler,
+  updateProjectByIdHandler,
+} from './project.controller';
 
 const router = Router();
 
@@ -90,5 +96,105 @@ router.post('/', authenticate, createProjectHandler);
  *         description: List of projects
  */
 router.get('/', authenticate, getProjectsHandler);
+
+/**
+ * @swagger
+ * /api/projects/{id}:
+ *   get:
+ *     summary: Get project detail by ID
+ *     tags: [Project]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the project
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Project detail
+ *       404:
+ *         description: Project not found
+ */
+router.get('/:id', authenticate, getProjectByIdHandler);
+
+/**
+ * @swagger
+ * /api/projects/{id}:
+ *   put:
+ *     summary: Update project by ID
+ *     tags: [Project]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *               endDate:
+ *                 type: string
+ *                 format: date-time
+ *               status:
+ *                 type: string
+ *                 enum: [active, on_hold, completed]
+ *               documents:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     url:
+ *                       type: string
+ *               teamEmails:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Project updated successfully
+ *       400:
+ *         description: Update failed
+ */
+router.put('/:id', authenticate, updateProjectByIdHandler);
+
+/**
+ * @swagger
+ * /api/projects/{id}:
+ *   delete:
+ *     summary: Delete a project by ID
+ *     tags: [Project]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Project deleted successfully
+ *       400:
+ *         description: Failed to delete project
+ */
+router.delete('/:id', authenticate, deleteProjectByIdHandler);
 
 export default router;
