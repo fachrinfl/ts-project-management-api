@@ -1,4 +1,5 @@
 import swaggerJSDoc from 'swagger-jsdoc';
+import { config } from '../config/env';
 
 const options: swaggerJSDoc.Options = {
   definition: {
@@ -12,6 +13,10 @@ const options: swaggerJSDoc.Options = {
       {
         url: 'http://localhost:3000',
         description: 'Local server',
+      },
+      {
+        url: config.apiBaseUrl,
+        description: 'Server from environment',
       },
     ],
     components: {

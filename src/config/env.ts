@@ -3,6 +3,7 @@ dotenv.config();
 
 export const config = {
   port: process.env.PORT || 3000,
+  apiBaseUrl: process.env.API_BASE_URL || '',
   databaseUrl: process.env.DATABASE_URL || '',
   cloudinaryUrl: process.env.CLOUDINARY_URL || '',
   jwt: {

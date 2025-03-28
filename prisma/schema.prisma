@@ -1,28 +1,55 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-    id           String         @id @default(uuid())
-    name         String
-    email        String         @unique
-    password     String
-    photo        String?
-    createdAt    DateTime       @default(now())
-    updatedAt    DateTime       @updatedAt
-    RefreshToken RefreshToken[]
+  id              String         @id @default(uuid())
+  name            String
+  email           String         @unique
+  password        String
+  photo           String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  RefreshToken    RefreshToken[]
+  createdProjects Project[]      @relation("CreatedProjects")
+  projectTeams    Project[]      @relation("ProjectTeam")
+  projectId       String?
+  Project         Project[]
 }
 
 model RefreshToken {
-    id        String   @id @default(uuid())
-    token     String   @unique
-    user      User     @relation(fields: [userId], references: [id])
-    userId    String
-    createdAt DateTime @default(now())
-    expiresAt DateTime
+  id        String   @id @default(uuid())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+model Project {
+  id          String        @id @default(uuid())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  description String?
+  status      ProjectStatus
+  documents   Json?
+  teams       User[]        @relation("ProjectTeam")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  createdById String
+  createdBy   User          @relation("CreatedProjects", fields: [createdById], references: [id])
+  User        User?         @relation(fields: [userId], references: [id])
+  userId      String?
+}
+
+enum ProjectStatus {
+  active
+  on_hold
+  completed
 }
