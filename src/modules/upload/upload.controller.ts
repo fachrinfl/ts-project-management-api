@@ -2,13 +2,17 @@ import { Request, Response } from 'express';
 import fs from 'fs';
 import { uploadToCloudinary } from './upload.service';
 
-export const uploadFile = async (req: Request, res: Response) => {
+export const uploadFile = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const file = req.file;
     const folder = req.body.folder;
 
     if (!file) {
-      return res.status(400).json({ message: 'File is required' });
+      res.status(400).json({ message: 'File is required' });
+      return;
     }
 
     const result = await uploadToCloudinary(file.path, folder);
