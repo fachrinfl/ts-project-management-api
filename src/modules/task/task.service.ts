@@ -194,3 +194,57 @@ export const deleteTask = async ({
 
   return { message: 'Task deleted successfully' };
 };
+
+interface GetTasksByProjectParams {
+  projectId: string;
+  status?: 'todo' | 'in_progress' | 'done';
+  priority?: 'high' | 'medium' | 'low';
+  page: number;
+  perPage: number;
+}
+
+export const getTasksByProjectId = async ({
+  projectId,
+  status,
+  priority,
+  page,
+  perPage,
+}: GetTasksByProjectParams) => {
+  const skip = (page - 1) * perPage;
+
+  const where = {
+    projectId,
+    ...(status && { status }),
+    ...(priority && { priority }),
+  };
+
+  const [tasks, totalItems] = await Promise.all([
+    prisma.task.findMany({
+      where,
+      skip,
+      take: perPage,
+      orderBy: {
+        endDate: 'asc',
+      },
+      include: {
+        assignee: { select: { id: true, name: true, email: true } },
+        createdBy: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+    }),
+    prisma.task.count({ where }),
+  ]);
+
+  return {
+    data: tasks,
+    meta: {
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalItems / perPage),
+        totalItems,
+        perPage,
+      },
+    },
+  };
+};

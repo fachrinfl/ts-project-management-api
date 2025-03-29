@@ -4,6 +4,7 @@ import {
   createTaskHandler,
   deleteTaskHandler,
   getTaskByIdHandler,
+  getTasksByProjectHandler,
   getTasksHandler,
   updateTaskByIdHandler,
 } from '../task/task.controller';
@@ -296,6 +297,53 @@ router.post('/:projectId/tasks', authenticate, createTaskHandler);
 
 /**
  * @swagger
+ * /api/projects/{projectId}/tasks:
+ *   get:
+ *     summary: Get list of tasks by project ID
+ *     tags: [Task]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         description: Project ID
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: status
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [todo, in_progress, done]
+ *       - in: query
+ *         name: priority
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [high, medium, low]
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: perPage
+ *         required: false
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of tasks
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/:projectId/tasks', authenticate, getTasksByProjectHandler);
+
+/**
+ * @swagger
  * /api/projects/{projectId}/tasks/{taskId}:
  *   get:
  *     summary: Get task detail by ID
@@ -323,9 +371,9 @@ router.get('/:projectId/tasks/:taskId', authenticate, getTaskByIdHandler);
 
 /**
  * @swagger
- * /api/projects/{projectId}/tasks/{taskId}:
- *   put:
- *     summary: Update task by ID
+ * /api/projects/{projectId}/tasks:
+ *   get:
+ *     summary: Get list of tasks by project ID
  *     tags: [Task]
  *     security:
  *       - bearerAuth: []
@@ -333,41 +381,38 @@ router.get('/:projectId/tasks/:taskId', authenticate, getTaskByIdHandler);
  *       - in: path
  *         name: projectId
  *         required: true
+ *         description: "Project ID"
  *         schema:
  *           type: string
- *       - in: path
- *         name: taskId
- *         required: true
+ *       - in: query
+ *         name: status
+ *         required: false
  *         schema:
  *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               startDate:
- *                 type: string
- *               endDate:
- *                 type: string
- *               status:
- *                 type: string
- *                 enum: [todo, in_progress, done]
- *               priority:
- *                 type: string
- *                 enum: [high, medium, low]
- *               assigneeId:
- *                 type: string
+ *           enum: [todo, in_progress, done]
+ *       - in: query
+ *         name: priority
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [high, medium, low]
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: perPage
+ *         required: false
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
- *         description: Task updated successfully
+ *         description: "List of tasks"
  *       400:
- *         description: Failed to update task
+ *         description: "Bad request"
+ *       401:
+ *         description: "Unauthorized"
  */
 router.put('/:projectId/tasks/:taskId', authenticate, updateTaskByIdHandler);
 

@@ -5,6 +5,7 @@ import {
   deleteTask,
   getAllTasks,
   getTaskById,
+  getTasksByProjectId,
   updateTaskById,
 } from './task.service';
 
@@ -121,5 +122,24 @@ export const deleteTaskHandler = async (
     res.status(200).json({ message: 'Task deleted successfully' });
   } catch (err: any) {
     res.status(400).json({ message: err.message || 'Failed to delete task' });
+  }
+};
+
+export const getTasksByProjectHandler = async (req: Request, res: Response) => {
+  try {
+    const { projectId } = req.params;
+    const { status, priority, page = '1', perPage = '10' } = req.query;
+
+    const tasks = await getTasksByProjectId({
+      projectId,
+      status: status as 'todo' | 'in_progress' | 'done',
+      priority: priority as 'high' | 'medium' | 'low',
+      page: parseInt(page as string, 10),
+      perPage: parseInt(perPage as string, 10),
+    });
+
+    res.status(200).json(tasks);
+  } catch (err: any) {
+    res.status(400).json({ message: err.message || 'Failed to fetch tasks' });
   }
 };
