@@ -93,11 +93,22 @@ export const updateProjectByIdHandler = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteProjectByIdHandler = async (req: Request, res: Response) => {
+export const deleteProjectByIdHandler = async (
+  req: AuthRequest,
+  res: Response,
+): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id: projectId } = req.params;
 
-    await deleteProjectById(id);
+    if (!req.user?.userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    await deleteProjectById({
+      projectId,
+      userId: req.user.userId,
+    });
 
     res.status(200).json({ message: 'Project deleted successfully' });
   } catch (err: any) {

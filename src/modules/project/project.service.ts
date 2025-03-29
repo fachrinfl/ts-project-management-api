@@ -101,10 +101,9 @@ export const getProjects = async ({
   ]);
 
   const totalPages = Math.ceil(totalItems / perPage);
-
+  const today = new Date();
   return {
     data: projects.map((project) => {
-      const today = new Date();
       const isOverdue = isBefore(project.endDate, today);
       const projectEndDate = new Date(project.endDate);
       const overdue = isBefore(new Date(project.endDate), today);
@@ -214,10 +213,34 @@ export const updateProjectById = async (
   return updatedProject;
 };
 
-export const deleteProjectById = async (id: string) => {
-  const deleted = await prisma.project.delete({
-    where: { id },
+export const deleteProjectById = async ({
+  projectId,
+  userId,
+}: {
+  projectId: string;
+  userId: string;
+}) => {
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
   });
 
-  return deleted;
+  if (!project) {
+    throw new Error('Project not found');
+  }
+
+  if (project.createdById !== userId) {
+    throw new Error('You are not authorized to delete this project');
+  }
+
+  await prisma.task.deleteMany({
+    where: {
+      projectId,
+    },
+  });
+
+  await prisma.project.delete({
+    where: { id: projectId },
+  });
+
+  return { message: 'Project deleted successfully' };
 };

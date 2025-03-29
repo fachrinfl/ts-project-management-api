@@ -1,6 +1,13 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.middleware';
 import {
+  createTaskHandler,
+  deleteTaskHandler,
+  getTaskByIdHandler,
+  getTasksHandler,
+  updateTaskByIdHandler,
+} from '../task/task.controller';
+import {
   createProjectHandler,
   deleteProjectByIdHandler,
   getProjectByIdHandler,
@@ -184,17 +191,209 @@ router.put('/:id', authenticate, updateProjectByIdHandler);
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
+ *         description: Project ID
  *     responses:
  *       200:
  *         description: Project deleted successfully
  *       400:
  *         description: Failed to delete project
+ *       401:
+ *         description: Unauthorized
  */
 router.delete('/:id', authenticate, deleteProjectByIdHandler);
+
+/**
+ * @swagger
+ * /api/projects/tasks/user:
+ *   get:
+ *     summary: Get all tasks with filters and pagination
+ *     tags: [Task]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: projectId
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [todo, in_progress, done]
+ *       - in: query
+ *         name: priority
+ *         schema:
+ *           type: string
+ *           enum: [high, medium, low]
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: perPage
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: List of tasks
+ */
+router.get('/tasks/user', authenticate, getTasksHandler);
+
+/**
+ * @swagger
+ * /api/projects/{projectId}/tasks:
+ *   post:
+ *     summary: Create a new task in a project
+ *     tags: [Task]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - startDate
+ *               - endDate
+ *               - status
+ *               - priority
+ *               - assigneeId
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               startDate:
+ *                 type: string
+ *               endDate:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [todo, in_progress, done]
+ *               priority:
+ *                 type: string
+ *                 enum: [high, medium, low]
+ *               assigneeId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Task created successfully
+ */
+router.post('/:projectId/tasks', authenticate, createTaskHandler);
+
+/**
+ * @swagger
+ * /api/projects/{projectId}/tasks/{taskId}:
+ *   get:
+ *     summary: Get task detail by ID
+ *     tags: [Task]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: taskId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Task detail found
+ *       404:
+ *         description: Task not found
+ */
+router.get('/:projectId/tasks/:taskId', authenticate, getTaskByIdHandler);
+
+/**
+ * @swagger
+ * /api/projects/{projectId}/tasks/{taskId}:
+ *   put:
+ *     summary: Update task by ID
+ *     tags: [Task]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: taskId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               startDate:
+ *                 type: string
+ *               endDate:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [todo, in_progress, done]
+ *               priority:
+ *                 type: string
+ *                 enum: [high, medium, low]
+ *               assigneeId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Task updated successfully
+ *       400:
+ *         description: Failed to update task
+ */
+router.put('/:projectId/tasks/:taskId', authenticate, updateTaskByIdHandler);
+
+/**
+ * @swagger
+ * /api/projects/tasks/{taskId}:
+ *   delete:
+ *     summary: Delete a task by ID
+ *     tags: [Task]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: taskId
+ *         required: true
+ *         description: ID of the task to delete
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Task deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       400:
+ *         description: Error during task deletion
+ */
+router.delete('/tasks/:taskId', authenticate, deleteTaskHandler);
 
 export default router;
